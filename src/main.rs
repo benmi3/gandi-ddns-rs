@@ -1,3 +1,4 @@
+mod get_config;
 mod get_ip;
 
 //use configparser::ini::Ini;
@@ -16,4 +17,5 @@ async fn main() {
     //println!("This is my int {my_int}");
     // Attempt to get an IP address and print it.
     let ip_set = get_ip::get_ipadress().await;
+    println!("{:?}",ip_set)
 }
