@@ -5,6 +5,8 @@ use ini::Ini;
 
 const CONF_FILE_NAME: &str = "config.ini";
 
+mod check_records;
+mod dns_providers;
 mod get_ip;
 
 //use log::{info,warn};
@@ -29,43 +31,30 @@ async fn main() {
     let ip_set = get_ip::get_ipadress().await;
     println!("{:?}",ip_set);
 
-    // start creating and updating entries
-    let mut conf = Ini::new();
-    conf.with_section(None::<String>).set("encoding", "utf-8");
-    conf.with_section(Some("User"))
-        .set("name", "Raspberry树莓")
-        .set("value", "Pi");
-    conf.with_section(Some("Library"))
-        .set("name", "Sun Yat-sen U")
-        .set("location", "Guangzhou=world\x0ahahaha");
-
-    conf.section_mut(Some("Library")).unwrap().insert("seats", "42");
-
-    println!("---------------------------------------");
-    println!("Writing to file {:?}\n", CONF_FILE_NAME);
-    conf.write_to(&mut stdout()).unwrap();
-
-    conf.write_to_file(CONF_FILE_NAME).unwrap();
-
-    println!("----------------------------------------");
+    // load the file
     println!("Reading from file {:?}", CONF_FILE_NAME);
-    let i = Ini::load_from_file(CONF_FILE_NAME).unwrap();
+    let conf = Ini::load_from_file(CONF_FILE_NAME).unwrap();
+    
+    // create Vec of domains that needs update
+    let needs_updating: Vec<&str> = Vec::new();
 
     println!("Iterating");
     let general_section_name = "__General__";
-    for (sec, prop) in i.iter() {
+    for (sec, prop) in conf.iter() {
         let section_name = sec.as_ref().unwrap_or(&general_section_name);
         println!("-- Section: {:?} begins", section_name);
+        println!("here comes prop");
+        println!("-- Prop : {:?}", prop.get("dnsprovider"));
         for (k, v) in prop.iter() {
-            println!("{}: {:?}", k, v);
+            println!("{}: {}", k, v);
         }
     }
     println!();
 
-    let section = i.section(Some("User")).unwrap();
-    println!("name={}", section.get("name").unwrap());
-    println!("conf[User][name]={}", &i["User"]["name"]);
-    println!("General Section: {:?}", i.general_section());
+    let section = conf.section(Some("Config1")).unwrap();
+    println!("cmain={}", section.get("domain").unwrap());
+    println!("conf[User][name]={}", &conf["Config1"]["domain"]);
+    println!("General Section: {:?}", conf.general_section());
 }
 
 fn create_config () -> bool {
@@ -74,12 +63,14 @@ fn create_config () -> bool {
     // set encoding to UTF-8
     conf.with_section(None::<String>).set("encoding", "utf-8");
     conf.with_section(Some("Config1"))
+        .set("dnsprovider", "Gandi")
         .set("apikey", "s3cr3t4p1k3y")
         .set("domain", "example.com")
         .set("rrset_name", "@")
         .set("rrset_type", "A")
         .set("rrset_ttl", "18000");
     conf.with_section(Some("Config2"))
+        .set("dnsprovider", "Gandi")
         .set("apikey", "s3cr3t4p1k3y")
         .set("domain", "example.com")
         .set("rrset_name", "@")
