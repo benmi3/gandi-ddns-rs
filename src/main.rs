@@ -1,13 +1,16 @@
 use std::io::stdout;
 use std::process;
 use std::path::Path;
-use ini::Ini;
+use check_records::check_record_gandi;
+use ini::{Ini, Properties};
+use record_parser::record_parser_gandi;
 
 const CONF_FILE_NAME: &str = "config.ini";
 
 mod check_records;
 mod dns_providers;
 mod get_ip;
+mod record_parser;
 
 //use log::{info,warn};
 
@@ -45,6 +48,7 @@ async fn main() {
         println!("-- Section: {:?} begins", section_name);
         println!("here comes prop");
         println!("-- Prop : {:?}", prop.get("dnsprovider"));
+        let config_data = handle_config_data(prop);
         for (k, v) in prop.iter() {
             println!("{}: {}", k, v);
         }
@@ -64,6 +68,7 @@ fn create_config () -> bool {
     conf.with_section(None::<String>).set("encoding", "utf-8");
     conf.with_section(Some("Config1"))
         .set("dnsprovider", "Gandi")
+        .set("email", "e@example.com")
         .set("apikey", "s3cr3t4p1k3y")
         .set("domain", "example.com")
         .set("rrset_name", "@")
@@ -71,6 +76,7 @@ fn create_config () -> bool {
         .set("rrset_ttl", "18000");
     conf.with_section(Some("Config2"))
         .set("dnsprovider", "Gandi")
+        .set("email", "e@example.com")
         .set("apikey", "s3cr3t4p1k3y")
         .set("domain", "example.com")
         .set("rrset_name", "@")
@@ -85,4 +91,24 @@ fn create_config () -> bool {
         else {
             false
         }
+}
+
+fn handle_config_data (config_data: Properties) -> bool {
+    let dnsprovider = config_data.get("dnsprovider");
+    match dnsprovider {
+        // Match a single value
+        Some("Gandi") => handle_config_gandi(config_data),
+        // Match several values
+        Some("Cloudflare") => false,
+        // TODO add more dns options
+        // Handle the rest of cases
+        _ => false,
+    }
+
+}
+
+fn handle_config_gandi(config_data: Properties) -> bool {
+    let record_data = record_parser_gandi(config_data);
+    println!("{:#?}",check_record_gandi(record_data));
+    true
 }
