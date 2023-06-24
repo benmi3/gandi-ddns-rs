@@ -1,5 +1,4 @@
 use reqwest;
-use serde_json;
 
 use crate::dns_providers::{Gandi,
 };
@@ -13,13 +12,13 @@ pub async fn check_record_gandi(record_fc: Gandi) -> Result<String, reqwest::Err
     //let rrset_name = gandi_rrset_name(record_fc);
     //let rrset_type = gandi_rrset_type(record_fc);
     let get_url = format!("https://api.gandi.net/v5/livedns/domains/{domain}/records/{rrset_name}/{rrset_type}",
-        domain=&record_fc.domain,
-        rrset_name=&record_fc.rrset_name,
-        rrset_type=&record_fc.rrset_type);
+        domain=record_fc.domain(),
+        rrset_name=record_fc.rrset_name(),
+        rrset_type=record_fc.rrset_type());
     //println!("{:#?}",get_url);
 
     let body = client.get("https://api.gandi.net/v5/livedns/domains/{domain}/records/{rrset_name}/{rrset_type}")
-        .header("authorization",format!("Apikey {apikey}", apikey=&record_fc.apikey))
+        .header("authorization",format!("Apikey {apikey}", apikey=record_fc.apikey()))
         .send()
         .await?
         .text()
