@@ -1,9 +1,9 @@
-use std::io::stdout;
 use std::process;
 use std::path::Path;
 use check_records::check_record_gandi;
 use ini::{Ini, Properties};
 use record_parser::record_parser_gandi;
+use update_records::update_record_gandi;
 
 const CONF_FILE_NAME: &str = "config.ini";
 
@@ -11,6 +11,7 @@ mod check_records;
 mod dns_providers;
 mod get_ip;
 mod record_parser;
+mod update_records;
 
 //use log::{info,warn};
 
@@ -39,7 +40,7 @@ async fn main() {
     let conf = Ini::load_from_file(CONF_FILE_NAME).unwrap();
     
     // create Vec of domains that needs update
-    let needs_updating: Vec<&str> = Vec::new();
+    //let needs_updating: Vec<&str> = Vec::new();
 
     println!("Iterating");
     let general_section_name = "__General__";
@@ -48,9 +49,12 @@ async fn main() {
         println!("-- Section: {:?} begins", section_name);
         println!("here comes prop");
         println!("-- Prop : {:?}", prop.get("dnsprovider"));
-        let config_data = handle_config_data(prop);
-        for (k, v) in prop.iter() {
-            println!("{}: {}", k, v);
+        let config_data = handle_config_data(prop.clone());
+        
+        if config_data {
+            println!("handled the data succesfully")
+        } else {
+            println!("somthing happened, and the data handling was not successfull")
         }
     }
     println!();
@@ -108,7 +112,16 @@ fn handle_config_data (config_data: Properties) -> bool {
 }
 
 fn handle_config_gandi(config_data: Properties) -> bool {
+    // first parse the raw data
+    // as the dnsprovider is Gandi, we will use the record_parser_gandi
     let record_data = record_parser_gandi(config_data);
-    println!("{:#?}",check_record_gandi(record_data));
+    // check if the current values are the same as the config
+    let check_result = check_record_gandi(record_data.clone());
+    // if the current values are not the same, update the values
+    if Some(check_result).is_some() {
+        update_record_gandi(record_data.clone());
+    } else {
+        todo!();
+    }
     true
 }

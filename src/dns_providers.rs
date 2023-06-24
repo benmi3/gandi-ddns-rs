@@ -19,7 +19,7 @@ impl Gandi {
     }
 
     pub fn apikey(&self) -> String{
-        self.apikey
+        self.apikey.clone()
     }
 
     pub fn domain(&self) -> String{
@@ -27,14 +27,14 @@ impl Gandi {
     }
 
     pub fn rrset_name(&self) -> String{
-        self.rrset_name
+        self.rrset_name.clone()
     }
 
     pub fn rrset_ttl(&self) -> String{
-        self.rrset_ttl
+        self.rrset_ttl.clone()
     }
 
     pub fn rrset_type(&self) -> String{
-        self.rrset_type
+        self.rrset_type.clone()
     }
 }
