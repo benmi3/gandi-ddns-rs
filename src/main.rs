@@ -1,6 +1,7 @@
 use std::process;
 use std::path::Path;
 use check_records::check_record_gandi;
+use get_ip::IpAdressSet;
 use ini::{Ini, Properties};
 use record_parser::record_parser_gandi;
 use update_records::update_record_gandi;
@@ -49,7 +50,7 @@ async fn main() {
         println!("-- Section: {:?} begins", section_name);
         println!("here comes prop");
         println!("-- Prop : {:?}", prop.get("dnsprovider"));
-        let config_data = handle_config_data(prop.clone());
+        let config_data = handle_config_data(prop.clone(), ip_set);
         
         if config_data {
             println!("handled the data succesfully")
@@ -97,11 +98,11 @@ fn create_config () -> bool {
         }
 }
 
-fn handle_config_data (config_data: Properties) -> bool {
+fn handle_config_data (config_data: Properties, ipadd: IpAdressSet) -> bool {
     let dnsprovider = config_data.get("dnsprovider");
     match dnsprovider {
         // Match a single value
-        Some("Gandi") => handle_config_gandi(config_data),
+        Some("Gandi") => handle_config_gandi(config_data, ipadd),
         // Match several values
         Some("Cloudflare") => false,
         // TODO add more dns options
@@ -111,7 +112,7 @@ fn handle_config_data (config_data: Properties) -> bool {
 
 }
 
-fn handle_config_gandi(config_data: Properties) -> bool {
+fn handle_config_gandi(config_data: Properties, ipadd: IpAdressSet) -> bool {
     // first parse the raw data
     // as the dnsprovider is Gandi, we will use the record_parser_gandi
     let record_data = record_parser_gandi(config_data);
@@ -119,7 +120,15 @@ fn handle_config_gandi(config_data: Properties) -> bool {
     let check_result = check_record_gandi(record_data.clone());
     // if the current values are not the same, update the values
     if Some(check_result).is_some() {
-        update_record_gandi(record_data.clone());
+        let ipv = match record_data.rrset_type() {
+            // if A record, give ipv4
+            "A".to_owned() => ipadd.get_ipv4(),
+            // if AAAA record, give ipv6
+            "AAAA".to_owned() => ipadd.get_ipv6(),
+            // else give nothing?
+            _ => "NOTHING".to_owned(),
+        }
+        update_record_gandi(record_data.clone(), ipadd);
     } else {
         todo!();
     }

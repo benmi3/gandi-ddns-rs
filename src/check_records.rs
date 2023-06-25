@@ -17,7 +17,7 @@ pub async fn check_record_gandi(record_fc: Gandi) -> Result<String, reqwest::Err
         rrset_type=record_fc.rrset_type());
     //println!("{:#?}",get_url);
 
-    let body = client.get("https://api.gandi.net/v5/livedns/domains/{domain}/records/{rrset_name}/{rrset_type}")
+    let body = client.get(get_url)
         .header("authorization",format!("Apikey {apikey}", apikey=record_fc.apikey()))
         .send()
         .await?
