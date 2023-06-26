@@ -3,7 +3,7 @@ use reqwest;
 use crate::dns_providers::{Gandi,
 };
 
-
+// unused code
 pub async fn check_record_gandi(record_fc: Gandi) -> Result<String, reqwest::Error> {
     let client = reqwest::Client::new();
     //let plain_link = "https://api.gandi.net/v5/livedns/domains/{domain}/records/{rrset_name}/{rrset_type}";

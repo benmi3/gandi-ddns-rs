@@ -1,14 +1,14 @@
 use std::process;
 use std::path::Path;
-use check_records::check_record_gandi;
-use get_ip::IpAdressSet;
 use ini::{Ini, Properties};
+//use check_records::check_record_gandi;
+use get_ip::IpAdressSet;
 use record_parser::record_parser_gandi;
 use update_records::update_record_gandi;
 
 const CONF_FILE_NAME: &str = "config.ini";
 
-mod check_records;
+//mod check_records;
 mod dns_providers;
 mod get_ip;
 mod record_parser;
@@ -25,10 +25,11 @@ async fn main() {
     else{
         println!("File didnt exists");
         println!("Creating template file");
+        // create a template file
         create_config();
-        // exiting program
         println!("Created the template");
         println!("Exiting program");
+        // exiting program
         process::exit(1);
     };
 
@@ -43,27 +44,21 @@ async fn main() {
     // create Vec of domains that needs update
     //let needs_updating: Vec<&str> = Vec::new();
 
-    println!("Iterating");
+    println!("Starting loop");
     let general_section_name = "__General__";
     for (sec, prop) in conf.iter() {
+        // get section name
         let section_name = sec.as_ref().unwrap_or(&general_section_name);
-        println!("-- Section: {:?} begins", section_name);
-        println!("here comes prop");
-        println!("-- Prop : {:?}", prop.get("dnsprovider"));
-        let config_data = handle_config_data(prop.clone(), ip_set);
+        println!("Now handeling section: {:?}", section_name);
+        let config_data = handle_config_data(prop.clone(), ip_set.clone()).await;
         
         if config_data {
             println!("handled the data succesfully")
         } else {
-            println!("somthing happened, and the data handling was not successfull")
+            println!("somthing happened, and the data handling was unsuccessfull")
         }
     }
-    println!();
-
-    let section = conf.section(Some("Config1")).unwrap();
-    println!("cmain={}", section.get("domain").unwrap());
-    println!("conf[User][name]={}", &conf["Config1"]["domain"]);
-    println!("General Section: {:?}", conf.general_section());
+    println!("Program finished")
 }
 
 fn create_config () -> bool {
@@ -98,11 +93,11 @@ fn create_config () -> bool {
         }
 }
 
-fn handle_config_data (config_data: Properties, ipadd: IpAdressSet) -> bool {
+async fn handle_config_data (config_data: Properties, ipadd: IpAdressSet) -> bool {
     let dnsprovider = config_data.get("dnsprovider");
     match dnsprovider {
         // Match a single value
-        Some("Gandi") => handle_config_gandi(config_data, ipadd),
+        Some("Gandi") => handle_config_gandi(config_data, ipadd).await,
         // Match several values
         Some("Cloudflare") => false,
         // TODO add more dns options
@@ -112,25 +107,28 @@ fn handle_config_data (config_data: Properties, ipadd: IpAdressSet) -> bool {
 
 }
 
-fn handle_config_gandi(config_data: Properties, ipadd: IpAdressSet) -> bool {
+async fn handle_config_gandi(config_data: Properties, ipadd: IpAdressSet) -> bool {
     // first parse the raw data
     // as the dnsprovider is Gandi, we will use the record_parser_gandi
     let record_data = record_parser_gandi(config_data);
-    // check if the current values are the same as the config
-    let check_result = check_record_gandi(record_data.clone());
-    // if the current values are not the same, update the values
-    if Some(check_result).is_some() {
-        let ipv = match record_data.rrset_type() {
-            // if A record, give ipv4
-            "A".to_owned() => ipadd.get_ipv4(),
-            // if AAAA record, give ipv6
-            "AAAA".to_owned() => ipadd.get_ipv6(),
-            // else give nothing?
-            _ => "NOTHING".to_owned(),
-        }
-        update_record_gandi(record_data.clone(), ipadd);
+    // update with new data
+    let ipv = match record_data.rrset_type().as_str() {
+        // if A record, give ipv4
+        "A" => ipadd.get_ipv4(),
+        // if AAAA record, give ipv6
+        "AAAA" => ipadd.get_ipv6(),
+        // else give local host to stop updating
+        _ => "UNSUPPORTED".to_owned(),
+    };
+    if ipv == "localhost" {
+        println!("Could not get public IP adress")
+    } else if ipv == "UNSUPPORTED" {
+        println!("Record type is currently unsupported")   
     } else {
-        todo!();
+        let update_result = update_record_gandi(record_data.clone(), ipv).await.unwrap();
+        println!("Result of updating {:?}", update_result)
+        
     }
+        
     true
 }

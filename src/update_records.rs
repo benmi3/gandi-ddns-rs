@@ -3,9 +3,7 @@ use reqwest;
 use crate::dns_providers::{Gandi,
 };
 
-pub async fn update_record_gandi(record_fc: Gandi, ipv: String) -> bool {
-    let
-    
+pub async fn update_record_gandi(record_fc: Gandi, ipv: String) -> Result<String, reqwest::Error> {
     
     
     let client = reqwest::Client::new();
@@ -29,13 +27,13 @@ pub async fn update_record_gandi(record_fc: Gandi, ipv: String) -> bool {
         .body(payload)
         .send()
         .await?
-        .text()
-        .await?;
+        .status();
     println!("{:?}", body);
     //cur_value = current_status.json()
     //try:
     //    cur_address = cur_value['rrset_values']
     //except KeyError:
     //    cur_address = ["127.0.0.1"]
-    Ok(body)
+    println!("return value {:?}",body);
+    Ok(body.to_string())
 }
