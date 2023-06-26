@@ -1,4 +1,4 @@
-## gandi-ddns-rs
+## Gandi-ddns-rs
 simple gandi-ddns script built in rust
 
 ## Problems
