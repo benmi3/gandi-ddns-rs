@@ -1,5 +1,6 @@
 ## Gandi-ddns-rs
 simple gandi-ddns script built in rust
+it works as is, but will rewrite it into smaller microservices, and make it easier to implement into other applications.
 
 ## Problems
 
