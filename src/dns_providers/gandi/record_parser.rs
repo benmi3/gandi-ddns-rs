@@ -1,6 +1,6 @@
 use ini::Properties;
 
-use crate::dns_providers::Gandi;
+use crate::dns_providers::gandi::Gandi;
 
 pub fn record_parser_gandi(record: Properties) -> Gandi {
     let apikey = record.get("apikey").unwrap_or_default().to_string();

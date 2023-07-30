@@ -3,16 +3,15 @@ use std::path::Path;
 use ini::{Ini, Properties};
 //use check_records::check_record_gandi;
 use get_ip::IpAdressSet;
-use record_parser::record_parser_gandi;
-use update_records::update_record_gandi;
+use dns_providers::gandi::record_parser::record_parser_gandi;
+use dns_providers::gandi::update_records::update_record_gandi;
 
 const CONF_FILE_NAME: &str = "config.ini";
 
 //mod check_records;
 mod dns_providers;
 mod get_ip;
-mod record_parser;
-mod update_records;
+//mod dns_providers::gandi;
 
 //use log::{info,warn};
 
