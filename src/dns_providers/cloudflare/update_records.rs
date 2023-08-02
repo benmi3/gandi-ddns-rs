@@ -1,21 +1,15 @@
 use reqwest;
 
-use crate::dns_providers::gandi::Gandi;
+use crate::dns_providers::cloudflare::Cloudflare;
 
-pub async fn update_record_gandi(record_fc: Gandi, ipv: String) -> Result<String, reqwest::Error> {
-    
+pub async fn update_record_gandi(record_fc: Cloudflare, ipv: String) -> Result<String, reqwest::Error> {
     
     let client = reqwest::Client::new();
-    //let plain_link = "https://api.gandi.net/v5/livedns/domains/{domain}/records/{rrset_name}/{rrset_type}";
-    //let apikey = gandi_apikey(record_fc);
-    //let domain = gandi_domain(record_fc);
-    //let rrset_name = gandi_rrset_name(record_fc);
-    //let rrset_type = gandi_rrset_type(record_fc);
+
     // url for api
-    let get_url = format!("https://api.gandi.net/v5/livedns/domains/{domain}/records/{rrset_name}/{rrset_type}",
-        domain=record_fc.domain(),
-        rrset_name=record_fc.rrset_name(),
-        rrset_type=record_fc.rrset_type());
+    let get_url = format!("https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns_records/{identifier}",
+        identifier=record_fc.domain(),
+        zone_identifier=record_fc.zone_id());
     // data payload
     let payload = format!("{{\"rrset_values\":[\"{ipadress}\"],\"rrset_ttl\":{rrset_ttl}}}", ipadress=ipv, rrset_ttl=record_fc.rrset_ttl());
 

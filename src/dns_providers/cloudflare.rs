@@ -13,6 +13,7 @@ pub struct Cloudflare {
     name: String,
     domain_type: String,
     ttl: String,
+    zone_id: String,
 }
 
 impl Cloudflare {
@@ -42,15 +43,19 @@ impl Cloudflare {
         self.domain.clone()
     }
 
-    pub fn rrset_name(&self) -> String{
-        self.rrset_name.clone()
+    pub fn name(&self) -> String{
+        self.name.clone()
     }
 
     pub fn rrset_ttl(&self) -> String{
-        self.rrset_ttl.clone()
+        self.ttl.clone()
     }
 
-    pub fn rrset_type(&self) -> String{
-        self.rrset_type.clone()
+    pub fn domain_type(&self) -> String{
+        self.domain_type.clone()
+    }
+
+    pub fn zone_id(&self) -> String{
+        self.zone_id.clone()
     }
 }

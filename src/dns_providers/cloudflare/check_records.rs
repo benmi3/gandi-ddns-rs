@@ -1,24 +1,20 @@
 use reqwest;
 
-use crate::dns_providers::gandi::Gandi;
+use crate::dns_providers::cloudflare::Cloudflare;
 
 // unused code
 #[allow(dead_code)]
-pub async fn check_record_gandi(record_fc: Gandi) -> Result<String, reqwest::Error> {
+pub async fn check_record_cloudfalre(record_fc: Cloudflare) -> Result<String, reqwest::Error> {
     let client = reqwest::Client::new();
-    //let plain_link = "https://api.gandi.net/v5/livedns/domains/{domain}/records/{rrset_name}/{rrset_type}";
-    //let apikey = gandi_apikey(record_fc);
-    //let domain = gandi_domain(record_fc);
-    //let rrset_name = gandi_rrset_name(record_fc);
-    //let rrset_type = gandi_rrset_type(record_fc);
-    let get_url = format!("https://api.gandi.net/v5/livedns/domains/{domain}/records/{rrset_name}/{rrset_type}",
-        domain=record_fc.domain(),
-        rrset_name=record_fc.rrset_name(),
-        rrset_type=record_fc.rrset_type());
+
+    let get_url = format!("https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns_records/{identifier}",
+        identifier=record_fc.domain(),
+        zone_identifier=record_fc.zone_id());
     //println!("{:#?}",get_url);
 
     let body = client.get(get_url)
-        .header("authorization",format!("Apikey {apikey}", apikey=record_fc.apikey()))
+        .header("X-Auth-Email:",format!("{email}", email=record_fc.email()))
+        .header("Content-Type: application/json")
         .send()
         .await?
         .text()

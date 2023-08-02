@@ -1,8 +1,8 @@
 use ini::Properties;
 
-use crate::dns_providers::gandi::Gandi;
+use crate::dns_providers::cloudflare::Cloudflare;
 
-pub fn record_parser_gandi(record: Properties) -> Gandi {
+pub fn record_parser_gandi(record: Properties) -> Cloudflare {
     let apikey = record.get("apikey").unwrap_or_default().to_string();
     let domain = record.get("domain").unwrap_or_default().to_string();
     let rrset_name = record.get("rrset_name").unwrap_or_default().to_string();
