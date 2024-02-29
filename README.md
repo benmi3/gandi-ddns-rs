@@ -1,4 +1,6 @@
-## Gandi-ddns-rs
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/benmi3/gandi-ddns-rs/CI?label=build)
+
+# Gandi-ddns-rs
 simple gandi-ddns script built in rust
 
 ## Problems
