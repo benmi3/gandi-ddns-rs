@@ -1,5 +1,5 @@
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/benmi3/gandi-ddns-rs/CI?label=Rust)
 
+![Rust workflow](https://github.com/benmi3/gandi-ddns-rs/actions/workflows/rust.yml/badge.svg)
 # Gandi-ddns-rs
 simple gandi-ddns script built in rust
 
